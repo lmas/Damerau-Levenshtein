@@ -1,9 +1,11 @@
+// Package tdl implements the true Damerau–Levenshtein distance.
+//
+// Reference:
+// https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance#Distance_with_adjacent_transpositions
+
 package tdl
 
 import "strings"
-
-// Reference:
-// https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance#Distance_with_adjacent_transpositions
 
 // Return the smalles int from a list
 func minimum(is ...int) int {
@@ -16,7 +18,7 @@ func minimum(is ...int) int {
 	return min
 }
 
-// Calculate and return the true Damerau–Levenshtein distance of string A and B.
+// Distance calculates and returns the true Damerau–Levenshtein distance of string A and B.
 func Distance(a, b string) int {
 	a, b = strings.TrimSpace(a), strings.TrimSpace(b)
 	lenA, lenB := len(a), len(b)

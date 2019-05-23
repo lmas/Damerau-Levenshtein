@@ -2,10 +2,12 @@
 Damerau-Levenshtein
 ================================================================================
 
+[![GoDoc](https://godoc.org/github.com/lmas/Damerau-Levenshtein?status.svg)](https://godoc.org/github.com/lmas/Damerau-Levenshtein)
+
 Calculate and return the true Damerau–Levenshtein distance of string A and B.
 
-See https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance#Distance_with_adjacent_transpositions
-for more information.
+Reference:
+https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance#Distance_with_adjacent_transpositions
 
 Example
 --------------------------------------------------------------------------------
