@@ -15,40 +15,76 @@ func minimum(is ...int) int {
 	return min
 }
 
+var tdl = New(100)
+
+// Distance is a shortcut func for doing a quick and dirty calculation,
+// without having to set up your own struct and stuff.
+// Not thread safe!
+func Distance(a, b string) int {
+	return tdl.Distance(a, b)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+// TrueDamerauLevenshtein is a struct that allocates memory only once, which is
+// used when running Distance().
+// This whole struct and associated functions are not thread safe in any way,
+// that will be the callers responsibility! At least for now...
+type TrueDamerauLevenshtein struct {
+	maxSize int
+	matrix  [][]int
+	da      map[rune]int
+}
+
+// New initializes a new struct which allocates memory only once, to be used by
+// Distance().
+// maxSize sets an upper limit for both input strings used in Distance().
+func New(maxSize int) *TrueDamerauLevenshtein {
+	t := &TrueDamerauLevenshtein{
+		maxSize: maxSize,
+		matrix:  make([][]int, maxSize),
+		da:      make(map[rune]int),
+	}
+	for i := range t.matrix {
+		t.matrix[i] = make([]int, maxSize)
+	}
+	return t
+}
+
 // Distance calculates and returns the true Damerau–Levenshtein distance of string A and B.
 // It's the caller's responsibility if he wants to trim whitespace or fix lower/upper cases.
-func Distance(a, b string) int {
+// Distance is also free from memory allocs and is pretty quick.
+func (t *TrueDamerauLevenshtein) Distance(a, b string) int {
 	lenA, lenB := len(a), len(b)
-	if lenA < 1 {
+	switch {
+	case lenA < 1:
 		return lenB
-	}
-	if lenB < 1 {
+	case lenB < 1:
 		return lenA
+	case lenA > t.maxSize:
+		return -1
+	case lenB > t.maxSize:
+		return -1
 	}
 
-	matrix := make([][]int, lenA+2)
-	for i := range matrix {
-		matrix[i] = make([]int, lenB+2)
-	}
-	matrix[0][0] = lenA + lenB + 1
+	t.matrix[0][0] = lenA + lenB + 1
 	for i := 0; i <= lenA; i++ {
-		matrix[i+1][1] = i
-		matrix[i+1][0] = matrix[0][0]
+		t.matrix[i+1][1] = i
+		t.matrix[i+1][0] = t.matrix[0][0]
 	}
 	for j := 0; j <= lenB; j++ {
-		matrix[1][j+1] = j
-		matrix[0][j+1] = matrix[0][0]
+		t.matrix[1][j+1] = j
+		t.matrix[0][j+1] = t.matrix[0][0]
 	}
 
-	da := make(map[rune]int)
 	for _, r := range a + b {
-		da[r] = 0
+		t.da[r] = 0
 	}
 
 	for i := 1; i <= lenA; i++ {
 		db := 0
 		for j := 1; j <= lenB; j++ {
-			i1 := da[rune(b[j-1])]
+			i1 := t.da[rune(b[j-1])]
 			j1 := db
 			cost := 1
 			if a[i-1] == b[j-1] {
@@ -57,14 +93,14 @@ func Distance(a, b string) int {
 			}
 
 			// By "conventional wisdom", the costs for the ins/del/trans operations are always +1
-			matrix[i+1][j+1] = minimum(
-				matrix[i][j]+cost, // substitution
-				matrix[i+1][j]+1,  // insertion
-				matrix[i][j+1]+1,  // deletion
-				matrix[i1][j1]+(i-i1-1)+1+(j-j1-1), // transposition
+			t.matrix[i+1][j+1] = minimum(
+				t.matrix[i][j]+cost,                  // substitution
+				t.matrix[i+1][j]+1,                   // insertion
+				t.matrix[i][j+1]+1,                   // deletion
+				t.matrix[i1][j1]+(i-i1-1)+1+(j-j1-1), // transposition
 			)
 		}
-		da[rune(a[i-1])] = i
+		t.da[rune(a[i-1])] = i
 	}
-	return matrix[lenA+1][lenB+1]
+	return t.matrix[lenA+1][lenB+1]
 }
