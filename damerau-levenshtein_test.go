@@ -20,7 +20,6 @@ var tableSimpel = []struct {
 	a, b  string
 }{
 	{0, "", ""},             // empty string
-	{0, "   ", ""},          // ignore white space in empty string
 	{6, "azerty", ""},       // non empty against empty string
 	{6, "", "qwerty"},       // empty against non empty string
 	{2, "azer", "azerty"},   // adding to end
