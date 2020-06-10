@@ -6,6 +6,18 @@ import (
 	"time"
 )
 
+func BenchmarkSimple(b *testing.B) {
+	tdl := New(100)
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		for _, row := range tableSimpel {
+			tdl.Distance("rossettacode", row.a)
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 func TestSimpelWordGroups(t *testing.T) {
 	for _, row := range tableSimpel {
 		s := Distance(row.a, row.b)
