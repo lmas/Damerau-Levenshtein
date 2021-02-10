@@ -15,13 +15,14 @@ func minimum(is ...int) int {
 	return min
 }
 
-var tdl = New(100)
+// TODO!!!
+var defTDL = New(100)
 
 // Distance is a shortcut func for doing a quick and dirty calculation,
 // without having to set up your own struct and stuff.
 // Not thread safe!
 func Distance(a, b string) int {
-	return tdl.Distance(a, b)
+	return defTDL.Distance(a, b)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
