@@ -15,14 +15,13 @@ func minimum(is ...int) int {
 	return min
 }
 
-// TODO!!!
-var defTDL = New(100)
+var defaultTDL = New(100)
 
 // Distance is a shortcut func for doing a quick and dirty calculation,
 // without having to set up your own struct and stuff.
 // Not thread safe!
 func Distance(a, b string) int {
-	return defTDL.Distance(a, b)
+	return defaultTDL.Distance(a, b)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -43,18 +42,28 @@ type TrueDamerauLevenshtein struct {
 func New(maxSize int) *TrueDamerauLevenshtein {
 	t := &TrueDamerauLevenshtein{
 		maxSize: maxSize,
-		matrix:  make([][]int, maxSize),
 		da:      make(map[rune]int),
 	}
-	for i := range t.matrix {
-		t.matrix[i] = make([]int, maxSize)
-	}
+	t.grow(maxSize)
 	return t
+}
+
+// grow grows the internal memory matrix.
+func (t *TrueDamerauLevenshtein) grow(n int) {
+	// bytes.Buffer.Grow() grows it's internal slice by 2 * cap() + n for example, let's try it too
+	s := 2*cap(t.matrix) + n
+	t.matrix = make([][]int, s)
+	for i := range t.matrix {
+		t.matrix[i] = make([]int, s)
+	}
+	t.maxSize = s
 }
 
 // Distance calculates and returns the true Damerau–Levenshtein distance of string A and B.
 // It's the caller's responsibility if he wants to trim whitespace or fix lower/upper cases.
-// Distance is also free from memory allocs and is pretty quick.
+//
+// If either of string A or B is too large for the internal memory matrix, we will allocate a bigger
+// matrix on the fly. If not, Distance() won't cause any other allocs.
 func (t *TrueDamerauLevenshtein) Distance(a, b string) int {
 	lenA, lenB := len(a), len(b)
 	switch {
@@ -62,10 +71,10 @@ func (t *TrueDamerauLevenshtein) Distance(a, b string) int {
 		return lenB
 	case lenB < 1:
 		return lenA
-	case lenA > t.maxSize:
-		return -1
-	case lenB > t.maxSize:
-		return -1
+	case lenA >= t.maxSize-1:
+		t.grow(lenA)
+	case lenB >= t.maxSize-1:
+		t.grow(lenB)
 	}
 
 	t.matrix[0][0] = lenA + lenB + 1

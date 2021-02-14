@@ -7,12 +7,38 @@ import (
 )
 
 func BenchmarkSimple(b *testing.B) {
-	tdl := New(100)
+	tdl := New(1) // make it super small so it's going to force grow
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		for _, row := range tableSimpel {
 			tdl.Distance("rossettacode", row.a)
 		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func TestGrowMatrix(t *testing.T) {
+	tdlA := New(10)
+	var s1 []byte
+	for i := 0; i < 1000; i++ {
+		s1 = append(s1, 's')
+		tdlA.Distance("a", string(s1))
+	}
+
+	tdlB := New(10)
+	var s2 []byte
+	for i := 0; i < 1000; i++ {
+		s2 = append(s2, 's')
+		tdlB.Distance(string(s2), "b")
+	}
+
+	// Now this run is going to slow things down
+	tdlC := New(10)
+	var s3 []byte
+	for i := 0; i < 1000; i++ {
+		s3 = append(s3, 's')
+		tdlC.Distance(string(s3), string(s3))
 	}
 }
 
